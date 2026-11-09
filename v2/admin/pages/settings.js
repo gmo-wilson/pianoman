@@ -10,6 +10,9 @@ export async function render(root) {
   const idle = h('input', { type: 'number', value: s.inactivity_timeout_seconds });
   const limit = h('input', { type: 'number', value: s.session_history_limit });
   const trans = h('input', { type: 'number', value: s.kiosk?.transition_ms ?? 320 });
+  const sleepOn = h('input', { type: 'checkbox', checked: s.kiosk?.screen_sleep_enabled ?? true });
+  const sleepIdle = h('input', { type: 'number', min: 10, value: s.kiosk?.idle_sleep_seconds ?? 60 });
+  const sleepPiano = h('input', { type: 'checkbox', checked: s.kiosk?.sleep_when_piano_off ?? true });
   const token = h('input', { type: 'password', value: api.token(), placeholder: 'leave empty if backend has none' });
 
   root.append(h('div', { class: 'grid cols-2' },
@@ -19,10 +22,16 @@ export async function render(root) {
       h('div', { class: 'row' }, h('label', { class: 'field' }, 'Slow', slow), h('label', { class: 'field' }, 'Normal', normal), h('label', { class: 'field' }, 'Fast', fast)),
       h('h2', { style: 'margin-top:16px' }, 'Kiosk'),
       h('div', { class: 'row' }, h('label', { class: 'field' }, 'Transition (ms)', trans)),
+      h('h2', { style: 'margin-top:16px' }, 'Screen sleep'),
+      h('div', { class: 'row' },
+        h('label', { class: 'field' }, 'Enabled', sleepOn),
+        h('label', { class: 'field' }, 'Screen off after idle (s)', sleepIdle),
+        h('label', { class: 'field' }, 'Also when piano is off', sleepPiano)),
+      h('p', { class: 'small muted' }, 'Wakes on touch, a piano key, or the piano being switched on.'),
       h('button', { class: 'primary', style: 'margin-top:16px', onClick: async () => {
         try {
           await api.put('/settings', { goal_minutes: +goal.value, inactivity_timeout_seconds: +idle.value, session_history_limit: +limit.value,
-            metronome: { slow: +slow.value, normal: +normal.value, fast: +fast.value }, kiosk: { ...(s.kiosk || {}), transition_ms: +trans.value } });
+            metronome: { slow: +slow.value, normal: +normal.value, fast: +fast.value }, kiosk: { ...(s.kiosk || {}), transition_ms: +trans.value, screen_sleep_enabled: sleepOn.checked, idle_sleep_seconds: +sleepIdle.value, sleep_when_piano_off: sleepPiano.checked } });
           toast('Saved — the kiosk picks it up on its next boot or session');
         } catch (e) { toast(e.message, true); }
       } }, 'Save')),

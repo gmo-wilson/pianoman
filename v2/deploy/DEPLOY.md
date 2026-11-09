@@ -11,7 +11,7 @@ Everything below is done once; afterwards updates ship from the admin (see §5).
 sudo raspi-config
 ```
 - *System Options → Boot / Auto Login* → **Desktop Autologin** (the kiosk runs inside the desktop session).
-- *Display Options → Screen Blanking* → **Disable** (install.sh also does this).
+- *Display Options → Screen Blanking* → **Disable** (install.sh also does this). The app turns the screen off itself: after 60 s idle or when the piano is off, waking on touch / key / power-on (admin → Settings → Screen sleep).
 - Optional but recommended: *Interface Options → SSH* → Enable, so you can manage it from the Mac.
 
 Give the Pi a fixed hostname (e.g. `piano`) so the admin is always at `http://piano.local:8080/admin`:

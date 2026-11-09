@@ -41,7 +41,10 @@ systemctl daemon-reload
 systemctl enable --now piano-backend.service
 
 # ---- let the backend restart itself from the admin "Update" button
-echo "$APP_USER ALL=(root) NOPASSWD: /bin/systemctl restart piano-backend.service" > /etc/sudoers.d/piano-timer
+{
+  echo "$APP_USER ALL=(root) NOPASSWD: /bin/systemctl restart piano-backend.service"
+  echo "$APP_USER ALL=(root) NOPASSWD: /bin/sh -c echo * > /sys/class/backlight/*/bl_power"   # backlight fallback
+} > /etc/sudoers.d/piano-timer
 chmod 440 /etc/sudoers.d/piano-timer
 
 # ---- kiosk: started by the desktop session via XDG autostart (wayfire / labwc / LXDE all honour it).
@@ -66,7 +69,17 @@ else
   echo "==> kiosk binary not found yet in $GODOT_DIR — copy the Godot export there; autostart is already in place"
 fi
 
-# ---- kiosk-friendly desktop: no screen blanking, no mouse cursor
+# ---- screen sleep: let the kiosk user switch the backlight (official 7" / DSI panels) without sudo
+cat > /etc/udev/rules.d/90-piano-backlight.rules <<'UDEV'
+SUBSYSTEM=="backlight", RUN+="/bin/chgrp video /sys/class/backlight/%k/bl_power /sys/class/backlight/%k/brightness", RUN+="/bin/chmod g+w /sys/class/backlight/%k/bl_power /sys/class/backlight/%k/brightness"
+UDEV
+usermod -aG video "$APP_USER" || true
+udevadm control --reload-rules 2>/dev/null && udevadm trigger --subsystem-match=backlight 2>/dev/null || true
+for bl in /sys/class/backlight/*; do
+  [ -e "$bl/bl_power" ] && chgrp video "$bl/bl_power" "$bl/brightness" 2>/dev/null && chmod g+w "$bl/bl_power" "$bl/brightness" 2>/dev/null
+done
+
+# ---- kiosk-friendly desktop: no screen blanking (the app manages the screen itself), no mouse cursor
 if command -v raspi-config >/dev/null; then
   raspi-config nonint do_blanking 1 >/dev/null 2>&1 || true   # 1 = disable blanking
 fi

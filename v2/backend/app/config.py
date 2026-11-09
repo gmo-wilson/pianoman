@@ -31,7 +31,7 @@ DEFAULT_SETTINGS = {
     "metronome": {"slow": 60, "normal": 80, "fast": 120},
     "inactivity_timeout_seconds": 300,
     "session_history_limit": 500,
-    "kiosk": {"theme": "dark", "transition_ms": 320, "idle_sleep_seconds": 600},
+    "kiosk": {"theme": "dark", "transition_ms": 320, "idle_sleep_seconds": 60, "sleep_when_piano_off": True, "screen_sleep_enabled": True},
     "game": {"runs_per_day": 3, "bonus_minutes": 10, "enabled": True},
     "road": {"steps_per_level": 3},
 }

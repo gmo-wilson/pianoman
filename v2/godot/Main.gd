@@ -14,6 +14,7 @@ var _sync_accum := 0.0
 func _ready() -> void:
 	theme = App.theme
 	Router.root = screens
+	add_child(preload("res://components/ScreenSaver.gd").new())
 	await App.refresh_all()
 	BuddyLib.sync()                       # fire and forget; buddies refresh when done
 	await Router.go("Select", {}, "fade")
