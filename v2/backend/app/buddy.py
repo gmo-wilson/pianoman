@@ -5,6 +5,8 @@ Buddy "road" rules — stateless, computed from practice history every time.
   * Each day since the first practice with no
     completed goal (yesterday and earlier)     → −1 step, floor 0
   * Today counts only once it is completed.
+  * Admin can set a position: (anchor_date, anchor_steps) → the walk starts there and earlier history is ignored,
+    so the student keeps evolving (or stepping back) from the chosen point.
   * Every `steps_per_level` steps is a milestone: level = steps // steps_per_level + 1, capped at `max_level`
     (the number of levels in the student's sprite set). Reaching a new milestone today → `evolved_today`
     (play the transformation); falling below one → `devolved` (shown as a step back).
@@ -32,12 +34,21 @@ DEFAULT_LEVELS: list[tuple[str, str]] = [
 ]
 
 
-def steps_until(completed: set[_dt.date], upto: _dt.date) -> int:
-    """Walk the road from the first completed day through `upto` (inclusive)."""
-    if not completed:
-        return 0
-    day = min(completed)
-    steps = 0
+def steps_until(completed: set[_dt.date], upto: _dt.date,
+                anchor_date: _dt.date | None = None, anchor_steps: int = 0) -> int:
+    """
+    Walk the road through `upto` (inclusive).
+    Without an anchor: start at 0 on the first completed day.
+    With an anchor (admin "set position"): start at `anchor_steps` on `anchor_date`; earlier history is ignored.
+    """
+    if anchor_date is not None:
+        day, steps = anchor_date, max(0, int(anchor_steps))
+        if upto < anchor_date:
+            return steps
+    else:
+        if not completed:
+            return 0
+        day, steps = min(completed), 0
     while day <= upto:
         steps = steps + 1 if day in completed else max(0, steps - 1)
         day += _dt.timedelta(days=1)
@@ -56,10 +67,14 @@ def compute_status(
     overrides: dict | None = None,
     max_level: int = 32,
     steps_per_level: int = 3,
+    anchor_date: _dt.date | None = None,
+    anchor_steps: int = 0,
 ) -> dict:
     today = today or _dt.date.today()
     overrides = overrides or {}
     completed = set(completed_dates)
+    if anchor_date is not None:
+        completed = {d for d in completed if d >= anchor_date}
     max_level = max(1, int(max_level))
     spl = max(1, int(steps_per_level))
 
@@ -70,15 +85,16 @@ def compute_status(
         completed.discard(today)
 
     yesterday = today - _dt.timedelta(days=1)
-    steps_yesterday = steps_until(completed, yesterday)                 # road position when today began
-    steps = steps_until(completed, today) if today_completed else steps_yesterday
+    walk = lambda upto: steps_until(completed, upto, anchor_date, anchor_steps)  # noqa: E731
+    steps_yesterday = walk(yesterday)                                   # road position when today began
+    steps = walk(today) if today_completed else steps_yesterday
     level = level_for(steps, spl, max_level)
     prev_level = level_for(steps_yesterday, spl, max_level)
     evolved_today = today_completed and level > prev_level
 
     # did the road move backwards at the start of today (yesterday was missed)?
-    before_yesterday = steps_until(completed, yesterday - _dt.timedelta(days=1))
-    lost_step_yesterday = bool(completed) and yesterday not in completed and steps_yesterday < before_yesterday
+    before_yesterday = walk(yesterday - _dt.timedelta(days=1))
+    lost_step_yesterday = yesterday not in completed and steps_yesterday < before_yesterday
     devolved = lost_step_yesterday and level_for(before_yesterday, spl, max_level) > prev_level
 
     streak = 0
@@ -87,16 +103,6 @@ def compute_status(
         streak += 1
         d -= _dt.timedelta(days=1)
     days_since = (today - max(completed)).days if completed else 999
-
-    # admin override
-    forced_level = overrides.get("forced_level")
-    if forced_level:
-        try:
-            v = int(forced_level)
-            if 1 <= v <= max_level:
-                level = v
-        except (TypeError, ValueError):
-            pass
 
     in_milestone = steps % spl
     return {
@@ -116,5 +122,5 @@ def compute_status(
         "days_since_practice": days_since,
         "today_completed": today_completed,
         "time_practiced_today": today_seconds,
-        "forced_level": forced_level,
+        "anchor_date": anchor_date.isoformat() if anchor_date else None,
     }

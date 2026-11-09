@@ -10,6 +10,8 @@ Routes (all JSON unless noted):
   GET  /api/v1/students/{id}/buddy     GET /api/v1/students/{id}/stats
   POST /api/v1/students/{id}/progress  {seconds}            -> buddy status
   POST /api/v1/students/{id}/celebrate
+  POST/DELETE /api/v1/students/{id}/road  {level, steps_in_level} | {steps}   (place on the road; rules continue)
+  POST /api/v1/students/{id}/reset {practice, sessions, runs, road}
   GET  /api/v1/buddies                 (all active students' buddy status — kiosk select screen)
   GET  /api/v1/students/{id}/game/credits   POST /api/v1/students/{id}/game/runs {score,distance,duration_s}
   GET  /api/v1/students/{id}/game/runs      POST /api/v1/students/{id}/game/reset (admin)
@@ -143,6 +145,27 @@ def student_progress(sid: int, body: dict):
     st = _404(repo.get_student(sid))
     repo.record_progress(sid, float(body.get("seconds", 0)), body.get("day"))
     return repo.buddy_status(st)
+
+
+@app.post("/api/v1/students/{sid}/road", dependencies=[Depends(admin_guard)])
+def student_set_road(sid: int, body: dict):
+    """{"level": 4, "steps_in_level": 1}  or  {"steps": 10}  — optional "day": "YYYY-MM-DD" (default today)."""
+    _404(repo.get_student(sid))
+    return repo.set_road_position(sid, body.get("level"), int(body.get("steps_in_level", 0)), body.get("steps"), body.get("day"))
+
+
+@app.delete("/api/v1/students/{sid}/road", dependencies=[Depends(admin_guard)])
+def student_clear_road(sid: int):
+    _404(repo.get_student(sid))
+    repo.clear_road_position(sid)
+    return repo.buddy_status(repo.get_student(sid))
+
+
+@app.post("/api/v1/students/{sid}/reset", dependencies=[Depends(admin_guard)])
+def student_reset(sid: int, body: dict):
+    """Opt-in flags: practice, sessions, runs, road."""
+    _404(repo.get_student(sid))
+    return repo.reset_student(sid, bool(body.get("practice")), bool(body.get("sessions")), bool(body.get("runs")), bool(body.get("road")))
 
 
 @app.post("/api/v1/students/{sid}/celebrate")

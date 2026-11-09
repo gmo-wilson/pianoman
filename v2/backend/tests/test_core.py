@@ -67,9 +67,22 @@ class RoadRules(unittest.TestCase):
         s = buddy.compute_status(done, today_seconds=900, today=self.T, max_level=100, steps_per_level=5)
         self.assertEqual((s["steps"], s["level"]), (60, 13))
 
-    def test_forced_level_override(self):
-        s = buddy.compute_status(set(), today=self.T, overrides={"forced_level": 7}, max_level=10)
-        self.assertEqual(s["level"], 7)
+    def test_anchor_sets_position_and_rules_continue(self):
+        # admin placed the student at level 4 (9 steps) 3 days ago; since then: practised 2 days, missed 1 (yesterday)
+        anchor = self.T - dt.timedelta(days=3)
+        done = self.days(3, 2)                         # anchor day + the day after completed; yesterday missed
+        s = buddy.compute_status(done, today=self.T, max_level=10, anchor_date=anchor, anchor_steps=9)
+        self.assertEqual((s["steps"], s["level"], s["lost_step_yesterday"]), (10, 4, True))   # 9 +1 +1 -1
+        # today completes → 11 steps, still level 4, one to go
+        s = buddy.compute_status(done, today_seconds=900, today=self.T, max_level=10, anchor_date=anchor, anchor_steps=9)
+        self.assertEqual((s["steps"], s["level"], s["steps_to_next"]), (11, 4, 1))
+        # history before the anchor is ignored (a huge streak before it changes nothing)
+        old = self.days(*range(4, 40))
+        s = buddy.compute_status(done | old, today_seconds=900, today=self.T, max_level=10, anchor_date=anchor, anchor_steps=9)
+        self.assertEqual(s["steps"], 11)
+        # anchor today at step 0 with a goal already done today → 1 step
+        s = buddy.compute_status(self.days(0), today_seconds=900, today=self.T, anchor_date=self.T, anchor_steps=0)
+        self.assertEqual((s["steps"], s["evolved_today"]), (1, False))
 
 
 class RepoAndMigration(unittest.TestCase):
@@ -284,12 +297,37 @@ class DynamicLevels(unittest.TestCase):
         self.assertEqual((s["level"], s["max_level"], s["level_name"], s["steps"]), (2, 2, "Top", 15))
         self.assertFalse(s["evolved_today"])
 
-    def test_delete_level_clamps_forced_levels(self):
+    def test_delete_level_caps_anchored_student(self):
         repo.add_sprite_level(self.sid, "B"); top = repo.add_sprite_level(self.sid, "C")
-        st = repo.create_student("Forced Kid", sprite_set=self.sid)
-        repo.update_student(st["id"], {"forced_level": 3})
+        st = repo.create_student("Capped Kid " + self._testMethodName, sprite_set=self.sid)
+        repo.set_road_position(st["id"], level=3, day="2026-11-09")
+        self.assertEqual(repo.buddy_status(repo.get_student(st["id"]), today=D(2026, 11, 9))["level"], 3)
         repo.delete_sprite_level(top["id"])
-        self.assertEqual(repo.get_student(st["id"])["forced_level"], 2)
+        s = repo.buddy_status(repo.get_student(st["id"]), today=D(2026, 11, 9))
+        self.assertEqual((s["level"], s["at_top"]), (2, True))      # steps kept, level capped by the ladder
+
+    def test_set_position_and_resets(self):
+        st = repo.create_student("Reset Kid " + self._testMethodName, sprite_set=self.sid)
+        for _ in range(4):
+            repo.add_sprite_level(self.sid, "L")
+        for i in range(1, 4):
+            repo.record_progress(st["id"], 900, day=(D(2026, 11, 9) - dt.timedelta(days=i)).isoformat())
+        s = repo.buddy_status(repo.get_student(st["id"]), today=D(2026, 11, 9))
+        self.assertEqual((s["steps"], s["level"]), (3, 2))
+        # place at level 4, one step in → 10 steps, as of today
+        s = repo.set_road_position(st["id"], level=4, steps_in_level=1, day="2026-11-09")
+        self.assertEqual((s["steps"], s["level"], s["steps_in_level"]), (10, 4, 1))
+        # practising today continues from there
+        repo.record_progress(st["id"], 900, day="2026-11-09")
+        s = repo.buddy_status(repo.get_student(st["id"]), today=D(2026, 11, 9))
+        self.assertEqual((s["steps"], s["level"]), (11, 4))
+        # resets
+        done = repo.reset_student(st["id"], road=True)
+        self.assertEqual(repo.buddy_status(repo.get_student(st["id"]), today=D(2026, 11, 9))["steps"], 1)   # anchor 0 + today done
+        done = repo.reset_student(st["id"], practice=True, sessions=True, runs=True)
+        self.assertEqual(done["practice_days"], 4)
+        s = repo.buddy_status(repo.get_student(st["id"]), today=D(2026, 11, 9))
+        self.assertEqual((s["steps"], s["level"], s["anchor_date"]), (0, 1, None))
 
     def test_set_delete_rules(self):
         self.assertFalse(repo.delete_sprite_set(repo.default_sprite_set_id()))

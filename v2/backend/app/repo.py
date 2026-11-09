@@ -73,7 +73,8 @@ def create_student(name: str, color: str | None = None, sprite_set: int | None =
     return get_student(sid)  # type: ignore[return-value]
 
 
-_STUDENT_FIELDS = {"name", "color", "sprite_set", "sort_order", "active", "forced_level", "base_color", "fed_date"}
+_STUDENT_FIELDS = {"name", "color", "sprite_set", "sort_order", "active", "base_color", "fed_date",
+                   "road_anchor_date", "road_anchor_steps"}
 
 
 def update_student(student_id: int, patch: dict) -> dict | None:
@@ -126,14 +127,16 @@ def buddy_status(student: dict, today: _dt.date | None = None) -> dict:
     set_id = student.get("sprite_set") or default_sprite_set_id()
     levels = list_sprite_levels(set_id) if set_id is not None else []
     settings = get_settings()
+    anchor = student.get("road_anchor_date")
     status = buddy.compute_status(
         completed_dates(sid),
         today_seconds=today_seconds(sid, today.isoformat()),
         goal_seconds=int(settings.get("goal_minutes", 15)) * 60,
         today=today,
-        overrides={"forced_level": student.get("forced_level")},
         max_level=len(levels) or 1,
         steps_per_level=int((settings.get("road") or {}).get("steps_per_level", 3)),
+        anchor_date=_dt.date.fromisoformat(anchor) if anchor else None,
+        anchor_steps=int(student.get("road_anchor_steps") or 0),
     )
     by_level = {l["level"]: l for l in levels}
     cur = by_level.get(status["level"], {})
@@ -146,6 +149,45 @@ def buddy_status(student: dict, today: _dt.date | None = None) -> dict:
     status["student_name"] = student["name"]
     status["sprite_set"] = set_id
     return status
+
+
+def set_road_position(student_id: int, level: int | None = None, steps_in_level: int = 0,
+                      steps: int | None = None, day: str | None = None) -> dict | None:
+    """Place the student on the road as of `day` (default today). Give either absolute `steps` or level + steps_in_level.
+    Today's completion (if any) still counts from here, and the normal rules continue."""
+    st = get_student(student_id)
+    if not st:
+        return None
+    spl = int((get_settings().get("road") or {}).get("steps_per_level", 3))
+    if steps is None:
+        lvl = max(1, int(level or 1))
+        steps = (lvl - 1) * spl + max(0, min(spl - 1, int(steps_in_level)))
+    update_student(student_id, {"road_anchor_date": day or _today(), "road_anchor_steps": max(0, int(steps))})
+    return buddy_status(get_student(student_id))  # type: ignore[arg-type]
+
+
+def clear_road_position(student_id: int) -> None:
+    update_student(student_id, {"road_anchor_date": None, "road_anchor_steps": None})
+
+
+def reset_student(student_id: int, practice: bool = False, sessions: bool = False, runs: bool = False,
+                  road: bool = False) -> dict:
+    """Destructive resets, each opt-in. `road` = back to step 0 as of today (history kept unless `practice`)."""
+    done = {}
+    with db.tx() as c:
+        if practice:
+            done["practice_days"] = c.execute("DELETE FROM practice_days WHERE student_id = ?", (student_id,)).rowcount
+        if sessions:
+            done["sessions"] = c.execute("DELETE FROM sessions WHERE student_id = ?", (student_id,)).rowcount
+        if runs:
+            done["game_runs"] = c.execute("DELETE FROM game_runs WHERE student_id = ?", (student_id,)).rowcount
+            c.execute("DELETE FROM game_credits WHERE student_id = ?", (student_id,))
+    if road:
+        set_road_position(student_id, steps=0)
+        done["road"] = "reset to step 0"
+    elif practice:
+        clear_road_position(student_id)          # no history and no anchor → fresh start
+    return done
 
 
 def celebrate_buddy(student_id: int) -> dict | None:
