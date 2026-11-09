@@ -53,15 +53,10 @@ func base_scale() -> Vector2:
 	return Vector2.ONE * sprite_scale * _norm
 
 
-## Celebration: dance for `seconds` with a gentle sway, then back to idle.
+## Celebration: play the dance sheet for `seconds`, then back to idle. No extra tweens — the art does the work.
 func dance(seconds := 2.4) -> void:
 	_busy = true
 	_play("dance")
-	var tw := create_tween()
-	tw.tween_property(self, "rotation_degrees", 8.0, 0.18).set_trans(Tween.TRANS_SINE)
-	tw.tween_property(self, "rotation_degrees", -8.0, 0.36).set_trans(Tween.TRANS_SINE)
-	tw.tween_property(self, "rotation_degrees", 0.0, 0.18).set_trans(Tween.TRANS_SINE)
-	tw.set_loops(maxi(1, int(seconds / 0.72)))
 	await get_tree().create_timer(seconds).timeout
 	_busy = false
 	_play("idle")
@@ -89,15 +84,23 @@ func land() -> void:
 		_play("run")
 
 
-## Tap: a little squash, then a short dance.
+## Tap: play the dance sheet once through (or ~1.6 s), then idle.
 func poke() -> void:
 	tapped.emit()
 	if _busy:
 		return
-	var tw := create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	tw.tween_property(_sprite, "scale", Vector2(1.18, 0.86) * sprite_scale * _norm, 0.09)
-	tw.tween_property(_sprite, "scale", base_scale(), 0.28)
-	dance(1.6)
+	dance(_anim_length("dance", 1.6))
+
+
+## Duration of one pass of an animation in seconds (falls back when unknown).
+func _anim_length(anim: String, fallback: float) -> float:
+	var sf := _sprite.sprite_frames
+	if sf == null or not sf.has_animation(anim) or sf.get_frame_count(anim) == 0:
+		return fallback
+	var total := 0.0
+	for i in sf.get_frame_count(anim):
+		total += sf.get_frame_duration(anim, i) / sf.get_animation_speed(anim)
+	return maxf(0.6, total)
 
 
 ## Milestone transformation: white flash → shrink + spin → swap to the new level's sprite → pop back out.
