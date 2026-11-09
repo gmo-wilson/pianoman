@@ -6,7 +6,9 @@ extends Control
 @onready var toast_label: Label = $Toast/Label
 
 const UPDATE_CHECK_EVERY := 15 * 60.0
+const CONTENT_SYNC_EVERY := 60.0          # students / settings / sprites, while idle on the home screen
 var _update_accum := 0.0
+var _sync_accum := 0.0
 
 
 func _ready() -> void:
@@ -17,6 +19,9 @@ func _ready() -> void:
 	await Router.go("Select", {}, "fade")
 	if not App.online:
 		show_toast("Backend offline — using cached data")
+	Router.screen_changed.connect(func(screen_name: String):
+		if screen_name == "Select":
+			_sync_content())
 	_check_updates()
 
 
@@ -25,6 +30,19 @@ func _process(delta: float) -> void:
 	if _update_accum >= UPDATE_CHECK_EVERY:
 		_update_accum = 0.0
 		_check_updates()
+	_sync_accum += delta
+	if _sync_accum >= CONTENT_SYNC_EVERY:
+		_sync_accum = 0.0
+		if Router.current_name == "Select" and not App.session_active:
+			_sync_content()
+
+
+## Pull students, settings and sprites from the admin; cheap when nothing changed.
+## Buddies on screen re-skin themselves via BuddyLib.updated; the Select screen rebuilds via App.students_loaded.
+func _sync_content() -> void:
+	_sync_accum = 0.0
+	await App.refresh_all()
+	await BuddyLib.sync()
 
 
 func _check_updates() -> void:

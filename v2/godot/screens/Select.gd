@@ -5,6 +5,7 @@ const CARD_W := 232.0
 
 var _cards_box: HBoxContainer
 var _status_lbl: Label
+var _last_sig := ""           # skip rebuilding (and re-animating) when nothing changed
 
 
 func _ready() -> void:
@@ -42,7 +43,11 @@ func _update_status() -> void:
 	_status_lbl.add_theme_color_override("font_color", App.SUCCESS if Midi.connected else App.WARNING)
 
 
-func _rebuild() -> void:
+func _rebuild(force := false) -> void:
+	var sig := JSON.stringify([App.students, App.buddies, BuddyLib.manifest.get("manifest_etag", "")])
+	if sig == _last_sig and not force:
+		return
+	_last_sig = sig
 	for c in _cards_box.get_children():
 		c.queue_free()
 	var cards := []
