@@ -44,19 +44,26 @@ systemctl enable --now piano-backend.service
 echo "$APP_USER ALL=(root) NOPASSWD: /bin/systemctl restart piano-backend.service" > /etc/sudoers.d/piano-timer
 chmod 440 /etc/sudoers.d/piano-timer
 
-# ---- kiosk: USER service in the desktop session (works on Wayland and X11)
-USER_UNIT_DIR="$APP_HOME/.config/systemd/user"
-install -d -o "$APP_USER" -g "$APP_USER" "$USER_UNIT_DIR"
-sed -e "s#__GODOT_DIR__#$GODOT_DIR#g" "$CODE_DIR/deploy/piano-kiosk.service" > "$USER_UNIT_DIR/piano-kiosk.service"
-chown "$APP_USER:$APP_USER" "$USER_UNIT_DIR/piano-kiosk.service"
-loginctl enable-linger "$APP_USER" >/dev/null 2>&1 || true
+# ---- kiosk: started by the desktop session via XDG autostart (wayfire / labwc / LXDE all honour it).
+#      kiosk.sh waits for the display + backend and relaunches the UI if it exits.
+AUTOSTART_DIR="$APP_HOME/.config/autostart"
+install -d -o "$APP_USER" -g "$APP_USER" "$AUTOSTART_DIR"
+sed -e "s#__CODE_DIR__#$CODE_DIR#g" "$CODE_DIR/deploy/piano-kiosk.desktop" > "$AUTOSTART_DIR/piano-kiosk.desktop"
+chown "$APP_USER:$APP_USER" "$AUTOSTART_DIR/piano-kiosk.desktop"
+chmod +x "$CODE_DIR/deploy/kiosk.sh"
+touch "$DATA_DIR/backups/kiosk.log"; chown "$APP_USER:$APP_USER" "$DATA_DIR/backups/kiosk.log"
+# remove the older user-service variant if a previous install created it
+USER_UNIT="$APP_HOME/.config/systemd/user/piano-kiosk.service"
+if [ -f "$USER_UNIT" ]; then
+  sudo -u "$APP_USER" XDG_RUNTIME_DIR="/run/user/$(id -u "$APP_USER")" systemctl --user disable --now piano-kiosk.service >/dev/null 2>&1 || true
+  rm -f "$USER_UNIT"
+fi
 if [ -f "$GODOT_DIR/piano-timer.arm64" ]; then
   chmod +x "$GODOT_DIR/piano-timer.arm64"
-  sudo -u "$APP_USER" XDG_RUNTIME_DIR="/run/user/$(id -u "$APP_USER")" systemctl --user daemon-reload || true
-  sudo -u "$APP_USER" XDG_RUNTIME_DIR="/run/user/$(id -u "$APP_USER")" systemctl --user enable --now piano-kiosk.service || true
-  echo "==> kiosk service enabled"
+  echo "==> kiosk autostart installed ($AUTOSTART_DIR/piano-kiosk.desktop). Start it now without rebooting:"
+  echo "      bash \"$CODE_DIR/deploy/kiosk.sh\" &"
 else
-  echo "==> kiosk binary not found yet in $GODOT_DIR — copy the Godot export there, then run this script again"
+  echo "==> kiosk binary not found yet in $GODOT_DIR — copy the Godot export there; autostart is already in place"
 fi
 
 # ---- kiosk-friendly desktop: no screen blanking, no mouse cursor
@@ -72,4 +79,4 @@ EOF
 IP=$(hostname -I | awk '{print $1}')
 echo
 echo "Backend:  http://$IP:8080/admin"
-echo "Logs:     journalctl -u piano-backend -f      journalctl --user -u piano-kiosk -f   (as $APP_USER)"
+echo "Logs:     journalctl -u piano-backend -f      tail -f $DATA_DIR/backups/kiosk.log"

@@ -27,7 +27,7 @@ sudo bash v2/deploy/install.sh
 ```
 `install.sh` installs system packages, creates the backend venv, **imports your v1 students/lessons/songs into
 `/var/lib/piano-timer/piano.db` (only on the very first run)**, installs and starts `piano-backend.service`,
-prepares the kiosk user service, the sudoers rule for the admin "Update" button, and a nightly backup.
+installs the kiosk autostart entry, the sudoers rule for the admin "Update" button, and a nightly backup.
 
 Check: `http://<pi-ip>:8080/admin` loads and the sidebar says `piano ✓ <your keyboard>` once the piano is plugged in.
 
@@ -52,7 +52,7 @@ Copy the full build to the Pi and enable the kiosk:
 scp v2/deploy/build/piano-timer.arm64 v2/deploy/build/piano-timer.arm64.pck pi@piano.local:/opt/piano-timer/godot/
 ssh pi@piano.local 'sudo bash ~/Piano\ timer/v2/deploy/install.sh'      # re-run: now finds the binary and enables the service
 ```
-The kiosk starts immediately and on every boot, after the desktop logs in.
+The kiosk starts on every boot right after the desktop logs in (XDG autostart → `deploy/kiosk.sh`, which waits for the backend and relaunches the UI if it ever exits). To start it right away without rebooting: `bash ~/"Piano timer"/v2/deploy/kiosk.sh &`.
 
 ## 4. Switch off v1
 
@@ -67,7 +67,7 @@ until you've seen v2 run for a few days.
 | Update kiosk screens/logic | export **Content only (.pck)** → admin → *Releases* → upload, keep "make current". Kiosks apply it at the next idle check (≤15 min) or reboot. Roll back by making an older release current. |
 | Update backend/admin | `git push` from the Mac, then admin → *Settings → Update backend* (runs `deploy/update.sh`: pull, pip, migrations, restart). Or over SSH: `bash v2/deploy/update.sh`. |
 | New sprites, levels, students, settings | admin only — the kiosk syncs on boot and every home screen. |
-| New Godot engine version | export a new **full build**, `scp` both files to `/opt/piano-timer/godot/`, `systemctl --user restart piano-kiosk`. |
+| New Godot engine version | export a new **full build**, `scp` both files to `/opt/piano-timer/godot/`, then `pkill -f piano-timer.arm64` (kiosk.sh relaunches it). |
 | Backups | nightly to `/var/lib/piano-timer/backups/` (30 kept). Off-site: install `rclone`, configure a remote named `backup`, uncomment the last line of `deploy/backup.sh`. |
 | Remote access away from home | install Tailscale on the Pi and your Mac; the admin is then at `http://piano:8080/admin` from anywhere. Set `PIANO_ADMIN_TOKEN` in `/etc/systemd/system/piano-backend.service` and paste it in *Settings → Admin token*. |
 
@@ -75,17 +75,17 @@ until you've seen v2 run for a few days.
 
 ```bash
 journalctl -u piano-backend -f                 # backend log
-journalctl --user -u piano-kiosk -f            # kiosk log (Godot output)
-systemctl --user restart piano-kiosk           # restart the UI
+tail -f /var/lib/piano-timer/backups/kiosk.log # kiosk log (Godot output)
+pkill -f piano-timer.arm64                     # restart the UI (kiosk.sh relaunches it)
 systemctl restart piano-backend                # restart the API
 curl -s localhost:8080/api/v1/midi/ports       # what the backend sees on the MIDI bus
 ```
 
 ## 7. Troubleshooting
 
-- **Black screen / kiosk never appears** → `journalctl --user -u piano-kiosk -n 50`. "cannot open display": the desktop
-  session isn't up or autologin is off (§1). On Bookworm's Wayland the binary runs through XWayland by default; to run
-  natively add `--display-driver wayland` to `ExecStart` in `~/.config/systemd/user/piano-kiosk.service`.
+- **Kiosk never appears** → `tail -50 /var/lib/piano-timer/backups/kiosk.log`. No log at all means the desktop didn't
+  run the autostart entry: check `ls ~/.config/autostart/` and that autologin to desktop is on (§1). On Bookworm's Wayland
+  the binary runs through XWayland by default; to run natively add `--display-driver wayland` to the launch line in `deploy/kiosk.sh`.
 - **"Backend offline" chip** → `systemctl status piano-backend`; most often a `pip install` failure for `python-rtmidi`
   (needs `libasound2-dev`, which install.sh installs).
 - **Piano not detected** → `aconnect -l` shows ALSA MIDI devices. If it's listed there but not in `/api/v1/midi/ports`,

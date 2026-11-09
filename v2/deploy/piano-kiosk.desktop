@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Piano Timer kiosk
+Comment=Starts the Piano Timer touchscreen UI with the desktop session
+Exec=/bin/bash "__CODE_DIR__/deploy/kiosk.sh"
+Terminal=false
+X-GNOME-Autostart-enabled=true
+NoDisplay=true
