@@ -25,3 +25,8 @@ v2/deploy/build/
 
 # scratch
 scratch/
+
+# Godot exports saved next to the project
+v2/godot/*.arm64
+v2/godot/*.pck
+v2/godot/*.x86_64
