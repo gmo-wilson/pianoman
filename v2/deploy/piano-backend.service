@@ -11,7 +11,7 @@ Environment=PIANO_DATA_DIR=__DATA_DIR__
 Environment=PIANO_PORT=8080
 # Environment=PIANO_ADMIN_TOKEN=change-me
 # Environment=PIANO_MIDI_OUT=Digital Piano
-ExecStart=__CODE_DIR__/backend/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8080 --log-level warning
+ExecStart="__CODE_DIR__/backend/.venv/bin/uvicorn" app.main:app --host 0.0.0.0 --port 8080 --log-level warning
 Restart=always
 RestartSec=3
 

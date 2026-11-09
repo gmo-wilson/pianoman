@@ -66,7 +66,7 @@ fi
 
 # ---- nightly backup
 cat > /etc/cron.d/piano-timer-backup <<EOF
-15 3 * * * $APP_USER bash $CODE_DIR/deploy/backup.sh >/dev/null 2>&1
+15 3 * * * $APP_USER bash "$CODE_DIR/deploy/backup.sh" >/dev/null 2>&1
 EOF
 
 IP=$(hostname -I | awk '{print $1}')
