@@ -1,0 +1,27 @@
+# macOS / editors
+.DS_Store
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.pyc
+v2/backend/.venv/
+v2/backend/data/
+.venv/
+
+# v1 runtime data (records live in the Pi's JSON files / v2 database, not in git)
+pi/progress.json
+pi/sessions.json
+pi/live_state.json
+pi/piano_command.json
+
+# Godot
+v2/godot/.godot/
+v2/godot/*.import
+v2/godot/**/*.import
+v2/godot/export_presets.cfg.secret
+v2/deploy/build/
+
+# scratch
+scratch/

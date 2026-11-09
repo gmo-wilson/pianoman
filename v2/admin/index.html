@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Piano Studio Admin</title>
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<nav class="side">
+  <div class="brand">🎹 <span>Piano Studio</span></div>
+  <a href="#/" data-route="/">Dashboard</a>
+  <a href="#/students" data-route="/students">Students</a>
+  <a href="#/sessions" data-route="/sessions">Sessions</a>
+  <a href="#/lessons" data-route="/lessons">Lessons</a>
+  <a href="#/songs" data-route="/songs">Songs</a>
+  <a href="#/sprites" data-route="/sprites">Sprites</a>
+  <a href="#/game" data-route="/game">Runner game</a>
+  <a href="#/releases" data-route="/releases">Releases</a>
+  <a href="#/settings" data-route="/settings">Settings</a>
+  <div class="side-foot" id="health">connecting…</div>
+</nav>
+<main id="view"></main>
+<div id="toast"></div>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

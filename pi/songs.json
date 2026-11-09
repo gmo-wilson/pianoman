@@ -1,0 +1,953 @@
+[
+    {
+        "id": "demo-fur-elise",
+        "title": "Für Elise",
+        "composer": "Ludwig van Beethoven",
+        "filename": "fur_elise.mid",
+        "file_size": 448,
+        "duration_seconds": 10.1,
+        "notes_count": 48,
+        "track_count": 1,
+        "upload_date": "2026-10-16 15:30",
+        "chords": [
+            "Am",
+            "E",
+            "C",
+            "G"
+        ],
+        "midi_events": [
+            {
+                "time": 0.0,
+                "type": "on",
+                "note": 76,
+                "vel": 85
+            },
+            {
+                "time": 0.22,
+                "type": "off",
+                "note": 76,
+                "vel": 0
+            },
+            {
+                "time": 0.25,
+                "type": "on",
+                "note": 75,
+                "vel": 85
+            },
+            {
+                "time": 0.47,
+                "type": "off",
+                "note": 75,
+                "vel": 0
+            },
+            {
+                "time": 0.5,
+                "type": "on",
+                "note": 76,
+                "vel": 85
+            },
+            {
+                "time": 0.72,
+                "type": "off",
+                "note": 76,
+                "vel": 0
+            },
+            {
+                "time": 0.75,
+                "type": "on",
+                "note": 75,
+                "vel": 85
+            },
+            {
+                "time": 0.97,
+                "type": "off",
+                "note": 75,
+                "vel": 0
+            },
+            {
+                "time": 1.0,
+                "type": "on",
+                "note": 76,
+                "vel": 85
+            },
+            {
+                "time": 1.22,
+                "type": "off",
+                "note": 76,
+                "vel": 0
+            },
+            {
+                "time": 1.25,
+                "type": "on",
+                "note": 71,
+                "vel": 80
+            },
+            {
+                "time": 1.47,
+                "type": "off",
+                "note": 71,
+                "vel": 0
+            },
+            {
+                "time": 1.5,
+                "type": "on",
+                "note": 74,
+                "vel": 80
+            },
+            {
+                "time": 1.72,
+                "type": "off",
+                "note": 74,
+                "vel": 0
+            },
+            {
+                "time": 1.75,
+                "type": "on",
+                "note": 72,
+                "vel": 80
+            },
+            {
+                "time": 1.97,
+                "type": "off",
+                "note": 72,
+                "vel": 0
+            },
+            {
+                "time": 2.0,
+                "type": "on",
+                "note": 69,
+                "vel": 90
+            },
+            {
+                "time": 2.0,
+                "type": "on",
+                "note": 45,
+                "vel": 70
+            },
+            {
+                "time": 2.3,
+                "type": "on",
+                "note": 52,
+                "vel": 70
+            },
+            {
+                "time": 2.35,
+                "type": "off",
+                "note": 45,
+                "vel": 0
+            },
+            {
+                "time": 2.6,
+                "type": "off",
+                "note": 69,
+                "vel": 0
+            },
+            {
+                "time": 2.6,
+                "type": "on",
+                "note": 57,
+                "vel": 70
+            },
+            {
+                "time": 2.65,
+                "type": "off",
+                "note": 52,
+                "vel": 0
+            },
+            {
+                "time": 2.8,
+                "type": "on",
+                "note": 60,
+                "vel": 75
+            },
+            {
+                "time": 2.9,
+                "type": "on",
+                "note": 60,
+                "vel": 70
+            },
+            {
+                "time": 2.95,
+                "type": "off",
+                "note": 57,
+                "vel": 0
+            },
+            {
+                "time": 3.05,
+                "type": "off",
+                "note": 60,
+                "vel": 0
+            },
+            {
+                "time": 3.1,
+                "type": "on",
+                "note": 64,
+                "vel": 75
+            },
+            {
+                "time": 3.2,
+                "type": "on",
+                "note": 64,
+                "vel": 70
+            },
+            {
+                "time": 3.25,
+                "type": "off",
+                "note": 60,
+                "vel": 0
+            },
+            {
+                "time": 3.35,
+                "type": "off",
+                "note": 64,
+                "vel": 0
+            },
+            {
+                "time": 3.4,
+                "type": "on",
+                "note": 69,
+                "vel": 75
+            },
+            {
+                "time": 3.55,
+                "type": "off",
+                "note": 64,
+                "vel": 0
+            },
+            {
+                "time": 3.65,
+                "type": "off",
+                "note": 69,
+                "vel": 0
+            },
+            {
+                "time": 3.7,
+                "type": "on",
+                "note": 71,
+                "vel": 90
+            },
+            {
+                "time": 3.7,
+                "type": "on",
+                "note": 40,
+                "vel": 70
+            },
+            {
+                "time": 4.0,
+                "type": "on",
+                "note": 47,
+                "vel": 70
+            },
+            {
+                "time": 4.05,
+                "type": "off",
+                "note": 40,
+                "vel": 0
+            },
+            {
+                "time": 4.3,
+                "type": "off",
+                "note": 71,
+                "vel": 0
+            },
+            {
+                "time": 4.3,
+                "type": "on",
+                "note": 52,
+                "vel": 70
+            },
+            {
+                "time": 4.35,
+                "type": "off",
+                "note": 47,
+                "vel": 0
+            },
+            {
+                "time": 4.4,
+                "type": "on",
+                "note": 64,
+                "vel": 75
+            },
+            {
+                "time": 4.6,
+                "type": "on",
+                "note": 56,
+                "vel": 70
+            },
+            {
+                "time": 4.65,
+                "type": "off",
+                "note": 52,
+                "vel": 0
+            },
+            {
+                "time": 4.65,
+                "type": "off",
+                "note": 64,
+                "vel": 0
+            },
+            {
+                "time": 4.7,
+                "type": "on",
+                "note": 68,
+                "vel": 75
+            },
+            {
+                "time": 4.9,
+                "type": "on",
+                "note": 59,
+                "vel": 70
+            },
+            {
+                "time": 4.95,
+                "type": "off",
+                "note": 56,
+                "vel": 0
+            },
+            {
+                "time": 4.95,
+                "type": "off",
+                "note": 68,
+                "vel": 0
+            },
+            {
+                "time": 5.0,
+                "type": "on",
+                "note": 71,
+                "vel": 75
+            },
+            {
+                "time": 5.25,
+                "type": "off",
+                "note": 59,
+                "vel": 0
+            },
+            {
+                "time": 5.25,
+                "type": "off",
+                "note": 71,
+                "vel": 0
+            },
+            {
+                "time": 5.3,
+                "type": "on",
+                "note": 72,
+                "vel": 90
+            },
+            {
+                "time": 5.3,
+                "type": "on",
+                "note": 45,
+                "vel": 70
+            },
+            {
+                "time": 5.6,
+                "type": "on",
+                "note": 52,
+                "vel": 70
+            },
+            {
+                "time": 5.65,
+                "type": "off",
+                "note": 45,
+                "vel": 0
+            },
+            {
+                "time": 5.9,
+                "type": "off",
+                "note": 72,
+                "vel": 0
+            },
+            {
+                "time": 5.9,
+                "type": "on",
+                "note": 57,
+                "vel": 70
+            },
+            {
+                "time": 5.95,
+                "type": "off",
+                "note": 52,
+                "vel": 0
+            },
+            {
+                "time": 6.1,
+                "type": "on",
+                "note": 64,
+                "vel": 75
+            },
+            {
+                "time": 6.2,
+                "type": "on",
+                "note": 60,
+                "vel": 70
+            },
+            {
+                "time": 6.25,
+                "type": "off",
+                "note": 57,
+                "vel": 0
+            },
+            {
+                "time": 6.35,
+                "type": "off",
+                "note": 64,
+                "vel": 0
+            },
+            {
+                "time": 6.4,
+                "type": "on",
+                "note": 76,
+                "vel": 85
+            },
+            {
+                "time": 6.5,
+                "type": "on",
+                "note": 64,
+                "vel": 70
+            },
+            {
+                "time": 6.55,
+                "type": "off",
+                "note": 60,
+                "vel": 0
+            },
+            {
+                "time": 6.62,
+                "type": "off",
+                "note": 76,
+                "vel": 0
+            },
+            {
+                "time": 6.65,
+                "type": "on",
+                "note": 75,
+                "vel": 85
+            },
+            {
+                "time": 6.85,
+                "type": "off",
+                "note": 64,
+                "vel": 0
+            },
+            {
+                "time": 6.87,
+                "type": "off",
+                "note": 75,
+                "vel": 0
+            },
+            {
+                "time": 6.9,
+                "type": "on",
+                "note": 76,
+                "vel": 85
+            },
+            {
+                "time": 7.12,
+                "type": "off",
+                "note": 76,
+                "vel": 0
+            },
+            {
+                "time": 7.15,
+                "type": "on",
+                "note": 75,
+                "vel": 85
+            },
+            {
+                "time": 7.37,
+                "type": "off",
+                "note": 75,
+                "vel": 0
+            },
+            {
+                "time": 7.4,
+                "type": "on",
+                "note": 76,
+                "vel": 85
+            },
+            {
+                "time": 7.62,
+                "type": "off",
+                "note": 76,
+                "vel": 0
+            },
+            {
+                "time": 7.65,
+                "type": "on",
+                "note": 71,
+                "vel": 80
+            },
+            {
+                "time": 7.87,
+                "type": "off",
+                "note": 71,
+                "vel": 0
+            },
+            {
+                "time": 7.9,
+                "type": "on",
+                "note": 74,
+                "vel": 80
+            },
+            {
+                "time": 8.12,
+                "type": "off",
+                "note": 74,
+                "vel": 0
+            },
+            {
+                "time": 8.15,
+                "type": "on",
+                "note": 72,
+                "vel": 80
+            },
+            {
+                "time": 8.37,
+                "type": "off",
+                "note": 72,
+                "vel": 0
+            },
+            {
+                "time": 8.4,
+                "type": "on",
+                "note": 69,
+                "vel": 95
+            },
+            {
+                "time": 8.4,
+                "type": "on",
+                "note": 45,
+                "vel": 75
+            },
+            {
+                "time": 8.7,
+                "type": "on",
+                "note": 52,
+                "vel": 75
+            },
+            {
+                "time": 8.8,
+                "type": "off",
+                "note": 45,
+                "vel": 0
+            },
+            {
+                "time": 9.0,
+                "type": "on",
+                "note": 57,
+                "vel": 75
+            },
+            {
+                "time": 9.1,
+                "type": "off",
+                "note": 52,
+                "vel": 0
+            },
+            {
+                "time": 9.2,
+                "type": "off",
+                "note": 69,
+                "vel": 0
+            },
+            {
+                "time": 9.3,
+                "type": "on",
+                "note": 60,
+                "vel": 80
+            },
+            {
+                "time": 9.3,
+                "type": "on",
+                "note": 64,
+                "vel": 80
+            },
+            {
+                "time": 9.3,
+                "type": "on",
+                "note": 69,
+                "vel": 85
+            },
+            {
+                "time": 9.4,
+                "type": "off",
+                "note": 57,
+                "vel": 0
+            },
+            {
+                "time": 9.9,
+                "type": "off",
+                "note": 60,
+                "vel": 0
+            },
+            {
+                "time": 9.9,
+                "type": "off",
+                "note": 64,
+                "vel": 0
+            },
+            {
+                "time": 10.1,
+                "type": "off",
+                "note": 69,
+                "vel": 0
+            }
+        ]
+    },
+    {
+        "id": "demo-canon-in-d",
+        "title": "Canon in D",
+        "composer": "Johann Pachelbel",
+        "filename": "canon_in_d.mid",
+        "file_size": 274,
+        "duration_seconds": 18.5,
+        "notes_count": 28,
+        "track_count": 1,
+        "upload_date": "2026-10-16 15:30",
+        "chords": [
+            "D",
+            "A",
+            "Bm",
+            "F#m",
+            "G"
+        ],
+        "midi_events": [
+            {
+                "time": 0.0,
+                "type": "on",
+                "note": 50,
+                "vel": 75
+            },
+            {
+                "time": 0.0,
+                "type": "on",
+                "note": 62,
+                "vel": 80
+            },
+            {
+                "time": 0.9,
+                "type": "off",
+                "note": 62,
+                "vel": 0
+            },
+            {
+                "time": 1.0,
+                "type": "on",
+                "note": 66,
+                "vel": 80
+            },
+            {
+                "time": 1.8,
+                "type": "off",
+                "note": 50,
+                "vel": 0
+            },
+            {
+                "time": 1.9,
+                "type": "off",
+                "note": 66,
+                "vel": 0
+            },
+            {
+                "time": 2.0,
+                "type": "on",
+                "note": 45,
+                "vel": 75
+            },
+            {
+                "time": 2.0,
+                "type": "on",
+                "note": 64,
+                "vel": 80
+            },
+            {
+                "time": 2.9,
+                "type": "off",
+                "note": 64,
+                "vel": 0
+            },
+            {
+                "time": 3.0,
+                "type": "on",
+                "note": 69,
+                "vel": 80
+            },
+            {
+                "time": 3.8,
+                "type": "off",
+                "note": 45,
+                "vel": 0
+            },
+            {
+                "time": 3.9,
+                "type": "off",
+                "note": 69,
+                "vel": 0
+            },
+            {
+                "time": 4.0,
+                "type": "on",
+                "note": 47,
+                "vel": 75
+            },
+            {
+                "time": 4.0,
+                "type": "on",
+                "note": 66,
+                "vel": 80
+            },
+            {
+                "time": 4.9,
+                "type": "off",
+                "note": 66,
+                "vel": 0
+            },
+            {
+                "time": 5.0,
+                "type": "on",
+                "note": 71,
+                "vel": 80
+            },
+            {
+                "time": 5.8,
+                "type": "off",
+                "note": 47,
+                "vel": 0
+            },
+            {
+                "time": 5.9,
+                "type": "off",
+                "note": 71,
+                "vel": 0
+            },
+            {
+                "time": 6.0,
+                "type": "on",
+                "note": 42,
+                "vel": 75
+            },
+            {
+                "time": 6.0,
+                "type": "on",
+                "note": 61,
+                "vel": 80
+            },
+            {
+                "time": 6.9,
+                "type": "off",
+                "note": 61,
+                "vel": 0
+            },
+            {
+                "time": 7.0,
+                "type": "on",
+                "note": 66,
+                "vel": 80
+            },
+            {
+                "time": 7.8,
+                "type": "off",
+                "note": 42,
+                "vel": 0
+            },
+            {
+                "time": 7.9,
+                "type": "off",
+                "note": 66,
+                "vel": 0
+            },
+            {
+                "time": 8.0,
+                "type": "on",
+                "note": 43,
+                "vel": 75
+            },
+            {
+                "time": 8.0,
+                "type": "on",
+                "note": 62,
+                "vel": 80
+            },
+            {
+                "time": 8.9,
+                "type": "off",
+                "note": 62,
+                "vel": 0
+            },
+            {
+                "time": 9.0,
+                "type": "on",
+                "note": 67,
+                "vel": 80
+            },
+            {
+                "time": 9.8,
+                "type": "off",
+                "note": 43,
+                "vel": 0
+            },
+            {
+                "time": 9.9,
+                "type": "off",
+                "note": 67,
+                "vel": 0
+            },
+            {
+                "time": 10.0,
+                "type": "on",
+                "note": 50,
+                "vel": 75
+            },
+            {
+                "time": 10.0,
+                "type": "on",
+                "note": 66,
+                "vel": 80
+            },
+            {
+                "time": 10.9,
+                "type": "off",
+                "note": 66,
+                "vel": 0
+            },
+            {
+                "time": 11.0,
+                "type": "on",
+                "note": 69,
+                "vel": 80
+            },
+            {
+                "time": 11.8,
+                "type": "off",
+                "note": 50,
+                "vel": 0
+            },
+            {
+                "time": 11.9,
+                "type": "off",
+                "note": 69,
+                "vel": 0
+            },
+            {
+                "time": 12.0,
+                "type": "on",
+                "note": 43,
+                "vel": 75
+            },
+            {
+                "time": 12.0,
+                "type": "on",
+                "note": 67,
+                "vel": 80
+            },
+            {
+                "time": 12.9,
+                "type": "off",
+                "note": 67,
+                "vel": 0
+            },
+            {
+                "time": 13.0,
+                "type": "on",
+                "note": 71,
+                "vel": 80
+            },
+            {
+                "time": 13.8,
+                "type": "off",
+                "note": 43,
+                "vel": 0
+            },
+            {
+                "time": 13.9,
+                "type": "off",
+                "note": 71,
+                "vel": 0
+            },
+            {
+                "time": 14.0,
+                "type": "on",
+                "note": 45,
+                "vel": 75
+            },
+            {
+                "time": 14.0,
+                "type": "on",
+                "note": 69,
+                "vel": 80
+            },
+            {
+                "time": 14.9,
+                "type": "off",
+                "note": 69,
+                "vel": 0
+            },
+            {
+                "time": 15.0,
+                "type": "on",
+                "note": 73,
+                "vel": 80
+            },
+            {
+                "time": 15.8,
+                "type": "off",
+                "note": 45,
+                "vel": 0
+            },
+            {
+                "time": 15.9,
+                "type": "off",
+                "note": 73,
+                "vel": 0
+            },
+            {
+                "time": 16.0,
+                "type": "on",
+                "note": 50,
+                "vel": 90
+            },
+            {
+                "time": 16.0,
+                "type": "on",
+                "note": 62,
+                "vel": 90
+            },
+            {
+                "time": 16.0,
+                "type": "on",
+                "note": 66,
+                "vel": 90
+            },
+            {
+                "time": 16.0,
+                "type": "on",
+                "note": 74,
+                "vel": 95
+            },
+            {
+                "time": 18.5,
+                "type": "off",
+                "note": 50,
+                "vel": 0
+            },
+            {
+                "time": 18.5,
+                "type": "off",
+                "note": 62,
+                "vel": 0
+            },
+            {
+                "time": 18.5,
+                "type": "off",
+                "note": 66,
+                "vel": 0
+            },
+            {
+                "time": 18.5,
+                "type": "off",
+                "note": 74,
+                "vel": 0
+            }
+        ]
+    }
+]

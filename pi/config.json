@@ -1,0 +1,13 @@
+{
+    "goal_minutes": 15,
+    "players": [
+        "Eva",
+        "Mara",
+        "Willy"
+    ],
+    "metronome": {
+        "slow": 60,
+        "normal": 80,
+        "fast": 120
+    }
+}

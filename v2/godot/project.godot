@@ -1,0 +1,50 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="Piano Timer"
+config/description="Piano practice timer kiosk for Raspberry Pi"
+run/main_scene="res://main.tscn"
+config/features=PackedStringArray("4.3", "GL Compatibility")
+config/icon="res://icon.svg"
+
+[autoload]
+
+Updater="*res://autoload/Updater.gd"
+App="*res://autoload/App.gd"
+Api="*res://autoload/Api.gd"
+Midi="*res://autoload/Midi.gd"
+BuddyLib="*res://autoload/BuddyLib.gd"
+Router="*res://autoload/Router.gd"
+
+[display]
+
+window/size/viewport_width=800
+window/size/viewport_height=480
+window/size/mode=3
+window/size/borderless=true
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+mouse_cursor/visible=false
+
+[gui]
+
+theme/default_font_subpixel_positioning=0
+
+[input_devices]
+
+pointing/emulate_touch_from_mouse=true
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/vram_compression/import_etc2_astc=true
