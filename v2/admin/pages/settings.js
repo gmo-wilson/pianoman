@@ -30,10 +30,39 @@ export async function render(root) {
       h('label', { class: 'field' }, 'Admin token (stored in this browser)', token),
       h('button', { class: 'sm', style: 'margin-top:8px', onClick: () => { api.setToken(token.value); toast('Token saved'); } }, 'Save token'),
       h('h2', { style: 'margin-top:20px' }, 'Backend update'),
-      h('p', { class: 'small muted' }, 'Runs deploy/update.sh on the Pi: git pull, pip install, DB migrations, service restart. Records are untouched.'),
-      h('button', { class: 'danger', onClick: async () => { if (!confirm('Update backend now? The admin will be unavailable for ~30 s.')) return; try { await api.post('/system/update'); toast('Update started'); } catch (e) { toast(e.message, true); } } }, 'Update backend'),
+      h('div', { id: 'sys-version', class: 'small muted' }, 'loading version…'),
+      h('p', { class: 'small muted' }, 'Push your changes to GitHub first, then: git pull, pip install, DB migrations and a service restart run on the Pi (deploy/update.sh). Records are untouched. The admin is unavailable for ~30 s.'),
+      h('button', { class: 'danger', onClick: async () => {
+        if (!confirm('Update backend now? The admin will be unavailable for ~30 s.')) return;
+        try { await api.post('/system/update'); toast('Update started — waiting for the backend to come back…'); waitForRestart(); } catch (e) { toast(e.message, true); }
+      } }, 'Update backend'),
+      h('details', { style: 'margin-top:10px' }, h('summary', { class: 'small muted', style: 'cursor:pointer' }, 'Last update log'),
+        h('pre', { id: 'update-log', class: 'small mono muted', style: 'white-space:pre-wrap; max-height:220px; overflow:auto' }, '…')),
       h('h2', { style: 'margin-top:20px' }, 'MIDI'),
       h('pre', { class: 'small mono muted', id: 'midi-ports' }, 'loading…')),
   ));
   api.get('/midi/ports').then(p => (document.getElementById('midi-ports').textContent = JSON.stringify(p, null, 2))).catch(() => {});
+}
+
+
+async function showVersion() {
+  try {
+    const v = await api.get('/system/version');
+    const el = document.getElementById('sys-version');
+    if (el) el.innerHTML = `Running <strong>${v.commit || '?'}</strong> on <code>${v.branch}</code> — ${v.commit_subject || ''} <span class="muted">(${v.commit_date || ''})</span>${v.dirty ? ' · <span class="badge warn">local changes</span>' : ''}`;
+    const log = document.getElementById('update-log');
+    if (log) log.textContent = v.update_log || 'no updates run yet';
+  } catch {}
+}
+showVersion();
+
+// after "Update backend": poll health until the restarted service answers, then refresh the version line
+async function waitForRestart() {
+  const started = Date.now();
+  await new Promise(r => setTimeout(r, 4000));
+  while (Date.now() - started < 120000) {
+    try { await api.get('/health'); toast('Backend is back'); showVersion(); return; } catch {}
+    await new Promise(r => setTimeout(r, 2000));
+  }
+  toast('Backend did not come back within 2 min — check journalctl -u piano-backend', true);
 }

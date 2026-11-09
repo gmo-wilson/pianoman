@@ -34,6 +34,7 @@ Routes (all JSON unless noted):
   GET  /api/v1/midi/ports              WS /ws/midi (piano input stream: status, note on/off)
   GET/POST /api/v1/live                (kiosk mirrors its state here for the admin)
   POST /api/v1/system/update           (runs deploy/update.sh — admin token required if set)
+  GET  /api/v1/system/version          (running commit + tail of the update log)
   /files/**  static DATA_DIR            /admin/**  static SPA
 """
 from __future__ import annotations
@@ -584,6 +585,31 @@ def live():
 @app.post("/api/v1/live")
 def post_live(body: dict):
     return repo.set_live(body)
+
+
+@app.get("/api/v1/system/version")
+def system_version():
+    """Which code is running: git commit/branch of the checkout + last update log lines."""
+    repo_dir = config.CODE_DIR.parent
+    def git(*args: str) -> str:
+        try:
+            return subprocess.run(["git", *args], cwd=str(repo_dir), capture_output=True, text=True, timeout=5).stdout.strip()
+        except Exception:  # noqa: BLE001
+            return ""
+    log_path = config.BACKUPS_DIR / "update.log"
+    tail = ""
+    if log_path.exists():
+        lines = log_path.read_text(errors="replace").splitlines()
+        tail = "\n".join(lines[-25:])
+    return {
+        "app_version": app.version,
+        "commit": git("rev-parse", "--short", "HEAD"),
+        "branch": git("rev-parse", "--abbrev-ref", "HEAD"),
+        "commit_date": git("log", "-1", "--format=%ci"),
+        "commit_subject": git("log", "-1", "--format=%s"),
+        "dirty": bool(git("status", "--porcelain")),
+        "update_log": tail,
+    }
 
 
 @app.post("/api/v1/system/update", dependencies=[Depends(admin_guard)])
