@@ -32,6 +32,10 @@ func _ready() -> void:
 	var center := func(): b.position = stage.size / 2.0
 	stage.resized.connect(center)
 	center.call()
+	# the card panel swallows touches before Node2D._unhandled_input sees them → forward taps on the stage
+	stage.gui_input.connect(func(e: InputEvent):
+		if (e is InputEventScreenTouch and e.is_pressed()) or (e is InputEventMouseButton and e.is_pressed()):
+			b.poke())
 	var road := RoadBar.new()
 	road.set_status(buddy_status)
 	road.size_flags_horizontal = SIZE_SHRINK_CENTER

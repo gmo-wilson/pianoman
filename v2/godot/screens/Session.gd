@@ -13,7 +13,6 @@ var _metro_btn: Button
 var _speed_btn: Button
 var _play_btn: Button
 var _slider: HSlider
-var _buddy: Buddy
 var _bonus_btn: Button
 var _metro_on := false
 var _speed_mode := "normal"
@@ -39,19 +38,11 @@ func _ready() -> void:
 	body.add_child(_ring)
 
 	var right := UI.column(body, true, 8)
-	var stage := Control.new()
-	stage.custom_minimum_size = Vector2(0, 110)
-	stage.size_flags_vertical = SIZE_EXPAND_FILL
-	stage.clip_contents = true
-	right.add_child(stage)
-	if not App.student.is_empty():
-		_buddy = Buddy.new()
-		_buddy.sprite_scale = 1.1
-		_buddy.set_status(App.buddies.get(int(App.student["id"]), {}))
-		stage.add_child(_buddy)
-		var center := func(): _buddy.position = stage.size / 2.0
-		stage.resized.connect(center)
-		center.call()
+	# distraction-free: live notation instead of the buddy
+	var staff_card := UI.card(right, 1.0, "Surface")
+	var staff := StaffView.new()
+	staff.size_flags_vertical = SIZE_EXPAND_FILL
+	staff_card.add_child(staff)
 	var chord_card := UI.card(right, 0.0, "Surface")
 	chord_card.get_parent().size_flags_vertical = SIZE_SHRINK_END
 	_chord_lbl = UI.label("—", "Display", HORIZONTAL_ALIGNMENT_CENTER)
@@ -164,8 +155,6 @@ func _celebrate() -> void:
 		return
 	_celebrated = true
 	_refresh_status()
-	if _buddy:
-		_buddy.dance(2.0)
 	var cp := CPUParticles2D.new()
 	cp.position = _ring.global_position + _ring.size / 2.0
 	cp.amount = 90
@@ -190,8 +179,6 @@ func _celebrate() -> void:
 func _on_bonus_reached() -> void:
 	_status_chip.text = "Bonus run unlocked  ★"
 	_status_chip.add_theme_color_override("font_color", App.SUCCESS)
-	if _buddy:
-		_buddy.dance(1.5)
 	_bonus_btn.visible = true
 	_bonus_btn.modulate.a = 0.0
 	create_tween().tween_property(_bonus_btn, "modulate:a", 1.0, 0.3)

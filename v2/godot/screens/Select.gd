@@ -91,6 +91,10 @@ func _add_card(student: Dictionary, buddy: Dictionary) -> Control:
 		var center := func(): b.position = stage.size / 2.0
 		stage.resized.connect(center)
 		center.call()
+		# the card panel swallows touches before Node2D._unhandled_input sees them → forward taps on the stage
+		stage.gui_input.connect(func(e: InputEvent):
+			if (e is InputEventScreenTouch and e.is_pressed()) or (e is InputEventMouseButton and e.is_pressed()):
+				b.poke())
 		v.add_child(UI.label(str(buddy.get("level_name", "")), "Caption", HORIZONTAL_ALIGNMENT_CENTER))
 		var road := RoadBar.new()
 		road.set_status(buddy)

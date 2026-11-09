@@ -276,10 +276,13 @@ func _process(delta: float) -> void:
 		_distance += _speed * delta
 		_score = int(_distance / 10.0)
 		_hud_score.text = "%05d" % _score
+		var was_airborne := _y < GROUND_Y - 0.5
 		_vy += GRAVITY * delta
 		_y = minf(GROUND_Y, _y + _vy * delta)
 		if _y >= GROUND_Y:
 			_vy = 0.0
+			if was_airborne:
+				_buddy.land()
 		_buddy.position.y = _y - 42
 		_spawn_in -= delta
 		if _spawn_in <= 0.0:

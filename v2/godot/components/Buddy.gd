@@ -22,7 +22,6 @@ func _ready() -> void:
 	_sprite.animation_finished.connect(_on_anim_finished)
 	BuddyLib.updated.connect(_refresh)
 	_refresh()
-	_idle_bob()
 
 
 func set_status(status: Dictionary) -> void:
@@ -79,15 +78,18 @@ func stop_run() -> void:
 	_play("idle")
 
 
-## Runner: play the jump once, then return to running.
+## Runner: show the jump while airborne (holds its last frame if it's shorter than the flight)…
 func jump() -> void:
-	if _sprite.sprite_frames and _sprite.sprite_frames.has_animation("jump"):
-		_sprite.play("jump")
-		await _sprite.animation_finished
-		if _busy:
-			_play("run")
+	_play("jump")
 
 
+## …and go straight back to running the moment the feet touch the ground.
+func land() -> void:
+	if _busy:
+		_play("run")
+
+
+## Tap: a little squash, then a short dance.
 func poke() -> void:
 	tapped.emit()
 	if _busy:
@@ -95,6 +97,7 @@ func poke() -> void:
 	var tw := create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	tw.tween_property(_sprite, "scale", Vector2(1.18, 0.86) * sprite_scale * _norm, 0.09)
 	tw.tween_property(_sprite, "scale", base_scale(), 0.28)
+	dance(1.6)
 
 
 ## Milestone transformation: white flash → shrink + spin → swap to the new level's sprite → pop back out.
@@ -132,11 +135,6 @@ func _on_anim_finished() -> void:
 	if not _busy:
 		_play("idle")
 
-
-func _idle_bob() -> void:
-	var tw := create_tween().set_loops()
-	tw.tween_property(_sprite, "position:y", -4.0, 1.1).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	tw.tween_property(_sprite, "position:y", 4.0, 1.1).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
 
 func _unhandled_input(event: InputEvent) -> void:
