@@ -15,6 +15,7 @@ var connected := false
 var device_names: PackedStringArray = []
 
 var _rescan_accum := 0.0
+var _native_rescan_accum := 0.0
 const RESCAN_EVERY := 2.0
 
 # ---- bridge
@@ -50,9 +51,13 @@ func _process(delta: float) -> void:
 			connection_changed.emit(connected)
 			if not connected:
 				active_notes.clear()
-		# Hot-plug: ALSA (the Pi) can re-enumerate by reopening; CoreMIDI on macOS cannot be reopened.
-		if not connected and OS.get_name() == "Linux":
-			_open()
+		# Native fallback only matters when the backend bridge is down. ALSA (the Pi) can re-enumerate by
+		# reopening; CoreMIDI on macOS cannot. Back off to every 10 s so we don't churn the ALSA sequencer.
+		if not connected and _ws_state != "open" and OS.get_name() == "Linux":
+			_native_rescan_accum += RESCAN_EVERY
+			if _native_rescan_accum >= 10.0:
+				_native_rescan_accum = 0.0
+				_open()
 
 
 func _open() -> void:

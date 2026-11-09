@@ -54,13 +54,30 @@ def _open_outport():
         return _outport
 
 
+def _close_outport() -> None:
+    global _outport, _outport_name
+    with _lock:
+        if _outport is not None:
+            try:
+                _outport.close()
+            except Exception:  # noqa: BLE001
+                pass
+        _outport, _outport_name = None, None
+
+
+def reconcile_outport(output_names: list[str]) -> None:
+    """Called by the input watcher every second: drop a vanished output port, so the next send reopens a fresh one."""
+    if _outport is not None and _outport_name not in output_names:
+        _close_outport()
+
+
 def _send(msg) -> None:
     port = _open_outport()
     if port is not None:
         try:
             port.send(msg)
         except Exception:  # noqa: BLE001
-            pass
+            _close_outport()          # stale handle (piano switched off mid-note); reopen on the next send
 
 
 def available_ports() -> dict:
@@ -317,13 +334,18 @@ class MidiInput:
                 pass
         self.port, self.port_name = None, None
         if self.active_notes:
+            for n in list(self.active_notes):      # release held notes on the kiosk side
+                self._publish({"t": "off", "n": n, "v": 0, "ts": time.time()})
             self.active_notes.clear()
+        player._active_notes.clear()
+        _close_outport()
         self._publish(self.status())
 
     def _watch(self) -> None:
         while not self._stop.is_set():
             try:
                 names = [n for n in mido.get_input_names()]
+                reconcile_outport(list(mido.get_output_names()))
             except Exception:  # noqa: BLE001
                 names = []
             if names != self.inputs:

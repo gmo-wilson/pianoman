@@ -22,6 +22,8 @@ func _ready() -> void:
 	Router.screen_changed.connect(func(screen_name: String):
 		if screen_name == "Select":
 			_sync_content())
+	Midi.connection_changed.connect(func(connected: bool):
+		show_toast("Piano connected" if connected else "Piano disconnected — turn it on to continue", 2.5 if connected else 4.0))
 	_check_updates()
 
 
