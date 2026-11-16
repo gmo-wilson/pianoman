@@ -161,6 +161,8 @@ class Player:
         self.events: list[dict] = []
         self.speed = 1.0
         self.mute_drums = True
+        self.loop = False
+        self.finished = False
         self.playing = False
         self.position = 0.0            # song seconds
         self.duration = 0.0
@@ -179,11 +181,13 @@ class Player:
         self.duration = self.events[-1]["time"] if self.events else 0.0
         self.song_id, self.label = song_id, label
         self.speed, self.mute_drums = speed, mute_drums
-        self.position, self._idx = 0.0, 0
+        self.position, self._idx, self.finished = 0.0, 0, False
 
     def play(self) -> None:
         if self.playing or not self.events:
             return
+        if self.finished or self._idx >= len(self.events):      # pressing Play after the end starts over
+            self.position, self._idx, self.finished = 0.0, 0, False
         self.playing = True
         self._stop.clear()
         self._thread = threading.Thread(target=self._loop, daemon=True)
@@ -196,7 +200,7 @@ class Player:
 
     def stop(self) -> None:
         self.pause()
-        self.position, self._idx = 0.0, 0
+        self.position, self._idx, self.finished = 0.0, 0, False
 
     def seek(self, pct: float) -> None:
         was = self.playing
@@ -242,15 +246,24 @@ class Player:
             self.position = e["time"]
             self._idx += 1
         if self._idx >= len(self.events):
-            self.playing = False
-            self.position = self.duration
             self.silence()
+            if self.loop and not self._stop.is_set():
+                time.sleep(0.6)                                   # a breath before the repeat
+                self.position, self._idx = 0.0, 0
+                if not self._stop.is_set():
+                    self._thread = threading.Thread(target=self._loop, daemon=True)
+                    self._thread.start()
+                return
+            self.playing = False
+            self.finished = True
+            self.position = self.duration
 
     def status(self) -> dict:
         return {
             "playing": self.playing, "position": round(self.position, 2), "duration": round(self.duration, 2),
             "progress": (self.position / self.duration) if self.duration else 0.0,
-            "speed": self.speed, "mute_drums": self.mute_drums, "song_id": self.song_id, "label": self.label,
+            "speed": self.speed, "mute_drums": self.mute_drums, "loop": self.loop, "finished": self.finished,
+            "song_id": self.song_id, "label": self.label,
             "events_loaded": len(self.events), "midi_out": _outport_name, "midi_available": mido is not None,
         }
 

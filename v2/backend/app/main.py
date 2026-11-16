@@ -29,7 +29,7 @@ Routes (all JSON unless noted):
   GET  /api/v1/sprites/manifest?set_id
   GET  /api/v1/releases  POST /api/v1/releases (multipart .pck)  POST /api/v1/releases/{version}/current
   GET  /api/v1/releases/current
-  POST /api/v1/player/{load|play|pause|stop|seek|speed|mute-drums}   GET /api/v1/player/status
+  POST /api/v1/player/{load|play|pause|stop|seek|speed|loop|mute-drums}   GET /api/v1/player/status
   POST /api/v1/metronome/{start|stop|bpm|count-in}                   GET /api/v1/metronome/status
   GET  /api/v1/midi/ports   POST /api/v1/midi/reconnect   WS /ws/midi (piano input stream: status, note on/off)
   GET/POST /api/v1/live                (kiosk mirrors its state here for the admin)
@@ -471,6 +471,7 @@ def _load_events_for(body: dict) -> tuple[list[dict], str | None, str | None]:
 def player_load(body: dict):
     events, sid, label = _load_events_for(body)
     midi_service.player.load(events, sid, label, float(body.get("speed", 1.0)), bool(body.get("mute_drums", True)))
+    midi_service.player.loop = bool(body.get("loop", midi_service.player.loop))
     if body.get("autoplay", True):
         midi_service.player.play()
     return midi_service.player.status()
@@ -503,6 +504,12 @@ def player_seek(body: dict):
 @app.post("/api/v1/player/speed")
 def player_speed(body: dict):
     midi_service.player.set_speed(float(body.get("speed", 1.0)))
+    return midi_service.player.status()
+
+
+@app.post("/api/v1/player/loop")
+def player_loop(body: dict):
+    midi_service.player.loop = bool(body.get("loop", False))
     return midi_service.player.status()
 
 

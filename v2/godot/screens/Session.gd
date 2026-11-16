@@ -12,6 +12,8 @@ var _notes_lbl: Label
 var _metro_btn: Button
 var _speed_btn: Button
 var _play_btn: Button
+var _loop_btn: Button
+var _loop := false
 var _slider: HSlider
 var _bonus_btn: Button
 var _metro_on := false
@@ -56,12 +58,14 @@ func _ready() -> void:
 	_speed_btn = UI.button("", "Button", _cycle_speed)
 	_play_btn = UI.button("▶  Play lesson", "Button", _toggle_play)
 	_play_btn.visible = not App.lesson.is_empty()
+	_loop_btn = UI.button("Loop  off", "Button", _toggle_loop)
+	_loop_btn.visible = not App.lesson.is_empty()
 	_bonus_btn = UI.button("▶  Play the bonus run", "SuccessButton", func():
 		Api.post_json("/api/v1/metronome/stop")
 		Api.post_json("/api/v1/player/stop")
 		App.end_session())
 	_bonus_btn.visible = false
-	var bar := UI.button_row(page, [_metro_btn, _speed_btn, _play_btn, _bonus_btn])
+	var bar := UI.button_row(page, [_metro_btn, _speed_btn, _play_btn, _loop_btn, _bonus_btn])
 	_slider = HSlider.new()
 	_slider.custom_minimum_size = Vector2(180, UI.TOUCH)
 	_slider.size_flags_horizontal = SIZE_EXPAND_FILL
@@ -85,7 +89,7 @@ func _ready() -> void:
 	Midi.note_off.connect(func(_n): _update_chord())
 	_refresh_status()
 	if not App.lesson.is_empty():
-		Api.post_json("/api/v1/player/load", {"lesson_id": App.lesson["id"], "autoplay": false, "speed": _speed_ratio()})
+		Api.post_json("/api/v1/player/load", {"lesson_id": App.lesson["id"], "autoplay": false, "speed": _speed_ratio(), "loop": _loop})
 
 
 func setup(params: Dictionary) -> void:
@@ -102,7 +106,7 @@ func _process(delta: float) -> void:
 		var st = await Api.get_json("/api/v1/player/status")
 		if st is Dictionary:
 			_slider.set_value_no_signal(float(st.get("progress", 0)))
-			_play_btn.text = "❚❚  Pause" if st.get("playing", false) else "▶  Play lesson"
+			_play_btn.text = "❚❚  Pause" if st.get("playing", false) else ("▶  Play again" if st.get("finished", false) else "▶  Play lesson")
 
 
 func _on_tick(acc: float, playing: bool) -> void:
@@ -211,6 +215,13 @@ func _cycle_speed() -> void:
 
 func _update_speed_label() -> void:
 	_speed_btn.text = "Tempo  %s · %d" % [_speed_mode.capitalize(), _bpm()]
+
+
+func _toggle_loop() -> void:
+	_loop = not _loop
+	_loop_btn.text = "Loop  %s" % ("on" if _loop else "off")
+	_loop_btn.theme_type_variation = "PrimaryButton" if _loop else "Button"
+	Api.post_json("/api/v1/player/loop", {"loop": _loop})
 
 
 func _toggle_play() -> void:

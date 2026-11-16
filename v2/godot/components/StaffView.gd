@@ -6,6 +6,9 @@ extends Control
 const LINE_GAP := 14.0            # px between staff lines → one diatonic step = 7 px
 const STEP := LINE_GAP / 2.0
 const CLEF_W := 70.0
+const CLEF_TEX := preload("res://ui/icons/treble_clef.png")   # engraved glyph (FreeSerif), white on alpha
+const CLEF_G_RATIO := 0.572                                     # where the G line crosses the glyph (from its top)
+const CLEF_HEIGHT_IN_STAVES := 3.0                              # clef height relative to the 4-gap staff height
 
 var _notes: Array = []            # sorted MIDI numbers currently held
 var _flash := {}                  # note -> seconds since pressed (for a soft pop-in)
@@ -60,7 +63,7 @@ func _draw() -> void:
 	while x < right - 8:
 		draw_line(Vector2(x, mc_y), Vector2(x + 5, mc_y), Color("#1f2937"), 1.0)
 		x += 10
-	_draw_treble_clef(Vector2(left + 26, top + 3 * LINE_GAP), 1.0, App.TEXT_PRIMARY)    # G line = 2nd from bottom
+	_draw_clef_texture(left + 8, top + 3 * LINE_GAP)                                   # G line = 2nd from bottom
 
 	if _notes.is_empty():
 		var f := get_theme_default_font()
@@ -115,34 +118,9 @@ func _draw_sharp(p: Vector2, col: Color) -> void:
 		draw_line(p + Vector2(-6, dy + 1.0), p + Vector2(6, dy - 1.5), col, 2.2, true)
 
 
-## Vector treble clef from the v1 control points, smoothed with Catmull-Rom. `g` = point on the G line.
-func _draw_treble_clef(g: Vector2, s: float, col: Color) -> void:
-	var w := 2.6 * s
-	# stem
-	draw_line(g + Vector2(0, -36 * s), g + Vector2(0, 22 * s), col, w, true)
-	var top_loop := [Vector2(0, -36), Vector2(6, -48), Vector2(2, -62), Vector2(-6, -50), Vector2(0, -36)]
-	var right_loop := [Vector2(0, -36), Vector2(13, -24), Vector2(13, -10), Vector2(0, -4)]
-	var belly := [Vector2(0, -4), Vector2(-13, 6), Vector2(-6, 16), Vector2(7, 10), Vector2(6, -5), Vector2(-3, 0)]
-	var hook := [Vector2(0, 22), Vector2(-2, 32), Vector2(-7, 29)]
-	for path in [top_loop, right_loop, belly, hook]:
-		var pts := PackedVector2Array()
-		for p in path:
-			pts.append(g + p * s)
-		draw_polyline(_smooth(pts), col, w, true)
-	draw_circle(g + Vector2(-7, 29) * s, 3.0 * s, col)
-
-
-static func _smooth(pts: PackedVector2Array, segments := 8) -> PackedVector2Array:
-	var out := PackedVector2Array()
-	if pts.size() < 3:
-		return pts
-	for i in pts.size() - 1:
-		var p0 := pts[maxi(i - 1, 0)]
-		var p1 := pts[i]
-		var p2 := pts[i + 1]
-		var p3 := pts[mini(i + 2, pts.size() - 1)]
-		for k in segments:
-			var t := float(k) / segments
-			out.append(0.5 * ((2.0 * p1) + (-p0 + p2) * t + (2.0 * p0 - 5.0 * p1 + 4.0 * p2 - p3) * t * t + (-p0 + 3.0 * p1 - 3.0 * p2 + p3) * t * t * t))
-	out.append(pts[pts.size() - 1])
-	return out
+## Engraved treble clef texture, scaled to the staff and anchored so its curl sits on the G line.
+func _draw_clef_texture(x: float, g_y: float) -> void:
+	var h := CLEF_HEIGHT_IN_STAVES * 4.0 * LINE_GAP
+	var w := h * float(CLEF_TEX.get_width()) / float(CLEF_TEX.get_height())
+	var top_y := g_y - CLEF_G_RATIO * h
+	draw_texture_rect(CLEF_TEX, Rect2(x, top_y, w, h), false, App.TEXT_PRIMARY)
