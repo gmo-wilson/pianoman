@@ -12,6 +12,10 @@ func _ready() -> void:
 	var page := UI.page(self)
 	var status_chip := UI.chip("", "Chip")
 	_status_lbl = status_chip.get_child(0)
+	status_chip.tooltip_text = "Tap to reconnect the piano"
+	status_chip.gui_input.connect(func(e: InputEvent):
+		if (e is InputEventScreenTouch and e.is_pressed()) or (e is InputEventMouseButton and e.is_pressed()):
+			_reconnect_piano())
 	UI.header(page, "Who's practicing?", Callable(), [
 		status_chip,
 		UI.button("Scores", "GhostButton", func(): Router.go("Leaderboard", {}, "slide_left")),
@@ -33,6 +37,13 @@ func _ready() -> void:
 	Midi.note_on.connect(func(_n, _v): _update_status())
 	BuddyLib.updated.connect(_rebuild)
 	_rebuild()
+	_update_status()
+
+
+func _reconnect_piano() -> void:
+	_status_lbl.text = "Reconnecting…"
+	await Api.post_json("/api/v1/midi/reconnect")
+	await get_tree().create_timer(1.5).timeout
 	_update_status()
 
 

@@ -48,9 +48,12 @@ export async function render(root) {
       h('details', { style: 'margin-top:10px' }, h('summary', { class: 'small muted', style: 'cursor:pointer' }, 'Last update log'),
         h('pre', { id: 'update-log', class: 'small mono muted', style: 'white-space:pre-wrap; max-height:220px; overflow:auto' }, '…')),
       h('h2', { style: 'margin-top:20px' }, 'MIDI'),
-      h('pre', { class: 'small mono muted', id: 'midi-ports' }, 'loading…')),
+      h('div', { class: 'row' },
+        h('button', { class: 'sm', onClick: async () => { await api.post('/midi/reconnect'); toast('Reconnecting piano…'); setTimeout(showPorts, 1500); } }, 'Reconnect piano'),
+        h('span', { class: 'small muted' }, 'Drops and reopens the piano\u2019s ports. Use it if the piano shows as connected but keys don\u2019t register.')),
+      h('pre', { class: 'small mono muted', id: 'midi-ports', style: 'margin-top:8px' }, 'loading…')),
   ));
-  api.get('/midi/ports').then(p => (document.getElementById('midi-ports').textContent = JSON.stringify(p, null, 2))).catch(() => {});
+  showPorts();
 }
 
 
@@ -74,4 +77,16 @@ async function waitForRestart() {
     await new Promise(r => setTimeout(r, 2000));
   }
   toast('Backend did not come back within 2 min — check journalctl -u piano-backend', true);
+}
+
+
+async function showPorts() {
+  try {
+    const p = await api.get('/midi/ports');
+    const st = p.input_status || {};
+    const last = st.last_event_ts ? `${Math.round(Date.now() / 1000 - st.last_event_ts)} s ago` : 'never';
+    const el = document.getElementById('midi-ports');
+    if (el) el.textContent = `input:  ${st.connected ? '✓ ' + st.name : '✗ none'}   last note: ${last}   reconnects: ${st.reconnects ?? 0}\n` +
+      `inputs: ${JSON.stringify(p.inputs)}\noutputs: ${JSON.stringify(p.outputs)}  selected: ${p.selected_output || '—'}`;
+  } catch {}
 }

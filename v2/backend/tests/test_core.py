@@ -315,14 +315,15 @@ class DynamicLevels(unittest.TestCase):
         s = repo.buddy_status(repo.get_student(st["id"]), today=D(2026, 11, 9))
         self.assertEqual((s["steps"], s["level"]), (3, 2))
         # place at level 4, one step in → 10 steps, as of today
-        s = repo.set_road_position(st["id"], level=4, steps_in_level=1, day="2026-11-09")
+        repo.set_road_position(st["id"], level=4, steps_in_level=1, day="2026-11-09")
+        s = repo.buddy_status(repo.get_student(st["id"]), today=D(2026, 11, 9))
         self.assertEqual((s["steps"], s["level"], s["steps_in_level"]), (10, 4, 1))
         # practising today continues from there
         repo.record_progress(st["id"], 900, day="2026-11-09")
         s = repo.buddy_status(repo.get_student(st["id"]), today=D(2026, 11, 9))
         self.assertEqual((s["steps"], s["level"]), (11, 4))
         # resets
-        done = repo.reset_student(st["id"], road=True)
+        done = repo.reset_student(st["id"], road=True, day="2026-11-09")
         self.assertEqual(repo.buddy_status(repo.get_student(st["id"]), today=D(2026, 11, 9))["steps"], 1)   # anchor 0 + today done
         done = repo.reset_student(st["id"], practice=True, sessions=True, runs=True)
         self.assertEqual(done["practice_days"], 4)

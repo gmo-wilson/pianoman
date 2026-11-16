@@ -27,9 +27,16 @@ def _today() -> str:
 
 # --------------------------------------------------------------------------- settings
 def get_settings() -> dict:
+    """Stored values over defaults; nested dicts are merged so new keys get their defaults."""
     out = json.loads(json.dumps(config.DEFAULT_SETTINGS))
     for r in db.query("SELECT key, value FROM settings"):
-        out[r["key"]] = json.loads(r["value"])
+        stored = json.loads(r["value"])
+        if isinstance(stored, dict) and isinstance(out.get(r["key"]), dict):
+            merged = dict(out[r["key"]])
+            merged.update(stored)
+            out[r["key"]] = merged
+        else:
+            out[r["key"]] = stored
     return out
 
 
@@ -171,7 +178,7 @@ def clear_road_position(student_id: int) -> None:
 
 
 def reset_student(student_id: int, practice: bool = False, sessions: bool = False, runs: bool = False,
-                  road: bool = False) -> dict:
+                  road: bool = False, day: str | None = None) -> dict:
     """Destructive resets, each opt-in. `road` = back to step 0 as of today (history kept unless `practice`)."""
     done = {}
     with db.tx() as c:
@@ -183,7 +190,7 @@ def reset_student(student_id: int, practice: bool = False, sessions: bool = Fals
             done["game_runs"] = c.execute("DELETE FROM game_runs WHERE student_id = ?", (student_id,)).rowcount
             c.execute("DELETE FROM game_credits WHERE student_id = ?", (student_id,))
     if road:
-        set_road_position(student_id, steps=0)
+        set_road_position(student_id, steps=0, day=day)
         done["road"] = "reset to step 0"
     elif practice:
         clear_road_position(student_id)          # no history and no anchor → fresh start

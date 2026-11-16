@@ -9,6 +9,7 @@ Degrades gracefully when `mido`/`python-rtmidi` or a MIDI port is missing (statu
 """
 from __future__ import annotations
 
+import os
 import threading
 import time
 from typing import Callable
@@ -272,6 +273,29 @@ class MidiInput:
         self._thread: threading.Thread | None = None
         self._stop = threading.Event()
         self.last_event_ts = 0.0
+        self._dev_sig = ""
+        self._force = False
+        self.reconnects = 0
+
+    def reconnect(self) -> dict:
+        """Force close + reopen (admin button / kiosk chip tap)."""
+        self._force = True
+        self.reconnects += 1
+        return self.status()
+
+    @staticmethod
+    def _device_signature() -> str:
+        """Identity of the MIDI hardware, not its name: ALSA reuses names/client numbers across re-plugs,
+        but the /dev/snd/midi* nodes get fresh inodes. Empty on non-Linux."""
+        try:
+            parts = []
+            for n in sorted(os.listdir("/dev/snd")):
+                if n.startswith("midi"):
+                    st = os.stat("/dev/snd/" + n)
+                    parts.append(f"{n}:{st.st_ino}:{int(st.st_ctime)}")
+            return "|".join(parts)
+        except OSError:
+            return ""
 
     def subscribe(self, cb: Callable[[dict], None]) -> Callable[[], None]:
         with _lock:
@@ -285,7 +309,7 @@ class MidiInput:
 
     def status(self) -> dict:
         return {"t": "status", "connected": self.port is not None, "name": self.port_name, "inputs": self.inputs,
-                "active_notes": sorted(self.active_notes)}
+                "active_notes": sorted(self.active_notes), "last_event_ts": self.last_event_ts, "reconnects": self.reconnects}
 
     def start(self) -> None:
         if mido is None or self._thread:
@@ -351,6 +375,14 @@ class MidiInput:
             if names != self.inputs:
                 self.inputs = names
                 self._publish(self.status())
+            sig = self._device_signature()
+            if sig != self._dev_sig:
+                if self._dev_sig != "" and self.port is not None:
+                    self._close()                       # hardware re-enumerated under the same name → reopen
+                self._dev_sig = sig
+            if self._force:
+                self._force = False
+                self._close()
             if self.port is not None and self.port_name not in names:
                 self._close()
             if self.port is None:

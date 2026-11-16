@@ -31,7 +31,7 @@ Routes (all JSON unless noted):
   GET  /api/v1/releases/current
   POST /api/v1/player/{load|play|pause|stop|seek|speed|mute-drums}   GET /api/v1/player/status
   POST /api/v1/metronome/{start|stop|bpm|count-in}                   GET /api/v1/metronome/status
-  GET  /api/v1/midi/ports              WS /ws/midi (piano input stream: status, note on/off)
+  GET  /api/v1/midi/ports   POST /api/v1/midi/reconnect   WS /ws/midi (piano input stream: status, note on/off)
   GET/POST /api/v1/live                (kiosk mirrors its state here for the admin)
   POST /api/v1/system/update           (runs deploy/update.sh — admin token required if set)
   GET  /api/v1/system/version          (running commit + tail of the update log)
@@ -547,6 +547,12 @@ def midi_ports():
     out = midi_service.available_ports()
     out["input_status"] = midi_service.midi_in.status()
     return out
+
+
+@app.post("/api/v1/midi/reconnect")
+def midi_reconnect():
+    """Force the backend to drop and reopen the piano's ports (kiosk chip tap / admin button)."""
+    return midi_service.midi_in.reconnect()
 
 
 @app.websocket("/ws/midi")
