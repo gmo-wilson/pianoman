@@ -11,7 +11,8 @@ func setup(params: Dictionary) -> void:
 
 func _ready() -> void:
 	var page := UI.page(self)
-	UI.header(page, "Lessons", Router.back, [], "Pick one to practise along with" if _pick else "Listen on the piano")
+	var actions := [] if _pick else [UI.button("●  Record lesson", "DangerButton", func(): Router.go("Record", {}, "slide_left"))]
+	UI.header(page, "Lessons", Router.back, actions, "Pick one to practise along with" if _pick else "Listen on the piano, or record a new one")
 	_list = UI.vscroll(page)
 	_load()
 
@@ -22,7 +23,7 @@ func _load() -> void:
 		_list.add_child(UI.label("Could not load lessons", "Caption"))
 		return
 	if lessons.is_empty():
-		_list.add_child(UI.label("No lessons yet — add one from the admin", "Caption"))
+		_list.add_child(UI.label("No lessons yet — tap Record lesson, or upload a MIDI in the admin", "Caption"))
 		return
 	var rows := []
 	for lesson in lessons:

@@ -249,8 +249,15 @@ def lessons():
 
 @app.post("/api/v1/lessons")
 def post_lesson(body: dict):
+    """Create a lesson. Kiosk recordings send midi_events only; chords are extracted here."""
     if not body.get("name"):
         raise HTTPException(400, "name required")
+    events = body.get("midi_events") or []
+    if events and not body.get("chords"):
+        from .midi_parse import extract_chords
+        body["chords"] = extract_chords(events)
+    if events:
+        body["midi_events"] = sorted(events, key=lambda e: float(e.get("time", 0)))
     return repo.upsert_lesson(body)
 
 
