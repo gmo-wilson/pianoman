@@ -75,8 +75,8 @@ func _draw() -> void:
 	for n in _notes:
 		var octave := int(n / 12.0) - 1
 		var pc := int(n) % 12
-		var step := (octave - 4) * 7 + DIATONIC[pc]             # 0 = middle C
-		var y := mc_y - step * STEP
+		var step: int = (octave - 4) * 7 + DIATONIC[pc]             # 0 = middle C
+		var y: float = mc_y - step * STEP
 		if step - prev_step == 1 and col > 0:
 			pass                                                   # a second: keep the same column, offset right
 		else:
