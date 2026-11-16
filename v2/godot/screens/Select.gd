@@ -18,8 +18,9 @@ func _ready() -> void:
 			_reconnect_piano())
 	UI.header(page, "Who's practicing?", Callable(), [
 		status_chip,
-		UI.button("Scores", "GhostButton", func(): Router.go("Leaderboard", {}, "slide_left")),
+		UI.button("Songs", "GhostButton", func(): Router.go("Songs", {}, "slide_left")),
 		UI.button("Lessons", "GhostButton", func(): Router.go("Lessons", {}, "slide_left")),
+		UI.button("Scores", "GhostButton", func(): Router.go("Leaderboard", {}, "slide_left")),
 	])
 
 	var scroll := ScrollContainer.new()

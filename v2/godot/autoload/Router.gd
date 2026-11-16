@@ -13,6 +13,7 @@ const SCREENS := {
 	"Runner": "res://screens/Runner.tscn",
 	"Leaderboard": "res://screens/Leaderboard.tscn",
 	"Record": "res://screens/Record.tscn",
+	"Songs": "res://screens/Songs.tscn",
 }
 
 var root: Control                      # set by main.tscn
