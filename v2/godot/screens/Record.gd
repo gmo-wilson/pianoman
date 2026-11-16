@@ -140,7 +140,7 @@ func _on_note_off(note: int) -> void:
 
 func _stop() -> void:
 	# close any notes still held
-	var t := snapped(Time.get_unix_time_from_system() - _started, 0.001)
+	var t: float = snapped(Time.get_unix_time_from_system() - _started, 0.001)
 	for n in Midi.active_notes.keys():
 		_events.append({"time": t, "type": "off", "note": int(n), "vel": 0, "channel": 0})
 	if _note_count == 0:
